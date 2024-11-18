@@ -61,9 +61,9 @@
        ```java
        dos.writeByte(entry.getKey());
        ```
-     - Размер кода кодирования (2 байта):
+     - Размер кода кодирования (1 байт):
        ```java
-       dos.writeShort(tempCode.size());
+       dos.writeByte(tempCode.size());
        ```
      - код символа `tempByteArray`:
        ```java
@@ -80,5 +80,5 @@
 2. `byte[]` - закодированные данные
 3. Для каждого символа:
    - `byte` (1 байт) - символ
-   - `short` (2 байта) - размер кода
+   - `short` (1 байт) - размер кода
    - `byte[]` - код символа

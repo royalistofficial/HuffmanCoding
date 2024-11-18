@@ -181,7 +181,7 @@ public class HuffmanCoding {
                     }
                 }
                 dos.writeByte(entry.getKey());
-                dos.writeShort(tempCode.size());
+                dos.writeByte(tempCode.size());
                 dos.write(tempByteArray);
             }
         } catch (IOException e) {
@@ -215,7 +215,7 @@ public class HuffmanCoding {
         
             while (dis.available() > 0) {
                 byte key = dis.readByte();
-                int codeLength = dis.readShort();
+                int codeLength = dis.readByte();
                 byte[] tempByteArray = new byte[(codeLength + 7) / 8];
                 dis.readFully(tempByteArray);
         
