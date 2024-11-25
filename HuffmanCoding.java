@@ -3,6 +3,7 @@ import java.util.logging.Logger;
 import java.util.logging.FileHandler;
 import java.util.logging.SimpleFormatter;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class HuffmanCoding {
@@ -135,10 +136,19 @@ public class HuffmanCoding {
             logger.severe("Ошибка при чтении файла: " + e.getMessage());
             return;
         }
+
+        byte[] fileNameBytes = inputFile.getBytes(StandardCharsets.UTF_8);
+
+        byte[] combinedData = new byte[fileNameBytes.length + data.length];
+
+        System.arraycopy(fileNameBytes, 0, combinedData, 0, fileNameBytes.length);
+
+        System.arraycopy(data, 0, combinedData, fileNameBytes.length, data.length);
+
         // logger.info("data: " + new String(data));
     
         Map<Byte, Integer> frequencyMap = new HashMap<>();
-        for (byte b : data) {
+        for (byte b : combinedData) {
             frequencyMap.put(b, frequencyMap.getOrDefault(b, 0) + 1);
         }
         // logger.info("frequencyMap: " + frequencyMap);
@@ -151,7 +161,7 @@ public class HuffmanCoding {
         logger.info("Конец generateCodes");    
         // logger.info("huffmanCodes: " + huffmanCodes);
         
-        List<Boolean> encodedData = huffmanEncode(data, huffmanCodes);
+        List<Boolean> encodedData = huffmanEncode(combinedData, huffmanCodes);
         // logger.info("encodedData: " + encodedData);  
 
         logger.info("Начало записи в файл");
@@ -165,6 +175,7 @@ public class HuffmanCoding {
                     byteArray[i / 8] |= (1 << (7 - (i % 8)));
                 }
             }
+            dos.writeInt(fileNameBytes.length);
             dos.writeInt(encodedData.size());
             dos.write(byteArray); 
         
@@ -196,8 +207,9 @@ public class HuffmanCoding {
         logger.info("Начало readAndDecompressToFile");
         List<Boolean> encodedData = new ArrayList<>();
         Map<Byte, List<Boolean>> huffmanCodes = new HashMap<>();
-        
+        int fileNameBytesLength;
         try (DataInputStream dis = new DataInputStream(new FileInputStream(inputFile))) {
+            fileNameBytesLength = dis.readInt();
             int encodedLength = dis.readInt();
             byte[] byteArray = new byte[(encodedLength + 7) / 8];
         
@@ -240,8 +252,9 @@ public class HuffmanCoding {
         byte[] decodedData = huffmanDecode(encodedData, huffmanCodes);
         // logger.info("Раскодированные данные: " + new String(decodedData));
 
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            fos.write(decodedData);
+        String fileName = new String(decodedData, 0, fileNameBytesLength, StandardCharsets.UTF_8);
+        try (FileOutputStream fos = new FileOutputStream(fileName)) {
+            fos.write(decodedData, fileNameBytesLength, decodedData.length - fileNameBytesLength);
         } catch (IOException e) {
             logger.severe("Ошибка при записи в файл: " + e.getMessage());
         }
